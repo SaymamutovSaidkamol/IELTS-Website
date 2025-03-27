@@ -1,0 +1,61 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  SEO
+  TEACHER
+  STUDENT
+}
+
+model Users {
+  id       Int    @id @default(autoincrement())
+  fullName String
+  email    String @unique
+  phone    String
+  password String
+  img      String
+  role     Role   @default(STUDENT)
+  status   String @default("INACTIVE")
+
+  comment  Comment[]
+}
+
+
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  productId Int
+  message   String
+  createdAt DateTime @default(now())
+
+  user    Users  @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+// import { IsInt, IsOptional } from 'class-validator';
+// export class CreateOrderDto {
+// @IsInt()
+// userId: number;
+
+// @IsInt()
+// productId: number;
+
+// @IsInt()
+// count: number;
+
+// @IsOptional()
+// orderDate?: Date = new Date(); // Hozirgi vaqtni avtomatik qo‘shish
+// }
