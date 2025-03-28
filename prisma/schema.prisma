@@ -20,30 +20,111 @@ enum Role {
   STUDENT
 }
 
-model Users {
-  id       Int    @id @default(autoincrement())
-  fullName String
-  email    String @unique
-  phone    String
-  password String
+enum Status {
+  ACTIVE
+  INACTIVE
+}
+
+model Center {
+  id Int @id @default(autoincrement())
+
+  name     String
+  document String
+  location String
+  regionId Int
   img      String
-  role     Role   @default(STUDENT)
-  status   String @default("INACTIVE")
+  status   Status
+  password String
+  email    String
 
-  comment  Comment[]
+  region  Region     @relation(fields: [regionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  teacher Teachers[]
 }
 
+model Teachers {
+  id Int @id @default(autoincrement())
 
+  name        String
+  email       String
+  password    String
+  phone       String
+  sertificate String
+  status      Status
+  img         String
+  centerId    Int
 
-model Comment {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  productId Int
-  message   String
-  createdAt DateTime @default(now())
-
-  user    Users  @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  center         Center   @relation(fields: [centerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  group          Groups[] @relation("teacher")
+  cheakerTeacher Groups[] @relation("cheakerteacher")
+  result         Result[]
 }
+
+model Groups {
+  id               Int      @id @default(autoincrement())
+  name             String
+  teacherId        Int
+  startTime        DateTime @default(now())
+  endTime          DateTime @default(now())
+  avarageScore     Float
+  cheakerTeacherId Int
+
+  teacher        Teachers  @relation(fields: [teacherId], references: [id], name: "teacher", onDelete: Cascade, onUpdate: Cascade)
+  cheakerteacher Teachers  @relation(fields: [cheakerTeacherId], references: [id], name: "cheakerteacher", onDelete: Cascade, onUpdate: Cascade)
+  student        Student[]
+}
+
+model Student {
+  id       Int    @id @default(autoincrement())
+  password String
+  groupId  Int
+  fullName String
+  phone    String
+
+  group Groups @relation(fields: [groupId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  exam  Exam[]
+}
+
+model Exam {
+  id                 Int      @id @default(autoincrement())
+  readingVariantId   Int
+  listiningVariantId Int
+  writingVariantId   Int
+  speakingVariantId  Int
+  studentId          Int
+  result             Result[]
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model Result {
+  id              Int    @id @default(autoincrement())
+  examId          Int
+  speakingScore   Float
+  listiningScore  Float
+  writingScore    Float
+  readingScore    Float
+  teacherId       Int
+  speakingComment String
+  WritingComment  String
+
+  teacher Teachers @relation(fields: [teacherId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  exam    Exam     @relation(fields: [examId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model Region {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  center Center[]
+}
+
+// model Groups {
+//   id        Int @id @default(autoincrement())
+//   studentId Int
+
+//   student Users      @relation(fields: [studentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+//   teacher Teachers[]
+// }
 
 // import { IsInt, IsOptional } from 'class-validator';
 // export class CreateOrderDto {
